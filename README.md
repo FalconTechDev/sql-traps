@@ -19,4 +19,4 @@ Note: the SQL Server image needs `ACCEPT_EULA=Y` (set in docker-compose.yml, Dev
 `traps/<id>.yaml`: `setup`, `cases` (name + sql), `teardown`, then `explanation` and `sources` (URL + date checked). Claims without a verified source are marked "not checked".
 
 ## Status (2026-10-18)
-11 traps, 4 engines (versions in `results/results.json`). 3 traps show no divergence (kept as controls). Not done: 30 traps, GitHub Pages deploy, a CI run on GitHub, release tag.
+30 traps, 4 engines (versions in `results/results.json`). Most explanations are observations from the run; only those with a linked, fetched doc page cite it, the rest say "docs: not checked". Controls with no divergence: count-star-vs-col, distinct-null, window-default-frame, not-in-null. Not done: green CI on GitHub (Actions is disabled for the account), Pages deploy, release tag.

@@ -1,0 +1,13 @@
+id: string-agg
+title: STRING_AGG
+setup:
+- CREATE TABLE t (s VARCHAR(5))
+- INSERT INTO t VALUES ('a'), ('b')
+teardown:
+- DROP TABLE t
+cases:
+- name: STRING_AGG(s, ',')
+  sql: SELECT STRING_AGG(s, ',') FROM t
+explanation: 'STRING_AGG exists in PostgreSQL and SQL Server only in this run; MySQL and MariaDB use GROUP_CONCAT
+  (not tested here). Observed per the run only; docs: not checked.'
+sources: []

@@ -1,0 +1,13 @@
+id: count-distinct-multi
+title: COUNT(DISTINCT a, b)
+setup:
+- CREATE TABLE t (a INT, b INT)
+- INSERT INTO t VALUES (1, 1), (1, 2), (1, 1)
+teardown:
+- DROP TABLE t
+cases:
+- name: COUNT(DISTINCT a, b)
+  sql: SELECT COUNT(DISTINCT a, b) FROM t
+explanation: 'COUNT(DISTINCT a, b) works only on MySQL and MariaDB. Observed per the run only; docs: not
+  checked.'
+sources: []

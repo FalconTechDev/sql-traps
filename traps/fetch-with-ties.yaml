@@ -11,9 +11,14 @@ cases:
 - name: ORDER BY x FETCH FIRST 2 ROWS ONLY
   sql: SELECT x FROM t ORDER BY x FETCH FIRST 2 ROWS ONLY
 explanation: 'MySQL 8.4 rejects FETCH FIRST here; SQL Server accepts FETCH only after OFFSET and only
-  with ONLY (WITH TIES is not in its documented syntax). MariaDB and PostgreSQL accept it. MariaDB and
-  MySQL docs: not checked.'
+  with ONLY (WITH TIES is not in its documented syntax). MariaDB and PostgreSQL accept it. MariaDB: WITH
+  TIES is documented from 10.6 (taken from a search-result summary, page not opened). MySQL docs: not
+  checked.'
 sources:
 - url: https://learn.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql?view=sql-server-ver16
   title: 'SQL Server: ORDER BY / OFFSET FETCH'
+  checked: '2026-10-18'
+- url: https://mariadb.com/docs/server/reference/sql-statements/data-manipulation/selecting-data/select-offset-fetch
+  title: 'MariaDB: SELECT ... OFFSET ... FETCH (WITH TIES since 10.6, per a web search summary; page itself
+    not fetched)'
   checked: '2026-10-18'

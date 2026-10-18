@@ -9,11 +9,15 @@ cases:
   sql: SELECT 'a' + NULL
 explanation: 'MySQL/MariaDB: || is logical OR by default (PIPES_AS_CONCAT off), so ''a''||NULL is NULL;
   SQL Server rejects ||. PostgreSQL CONCAT ignores NULL arguments, giving ''a''; PostgreSQL''s || result
-  comes from the run only (docs page did not cover it). SQL Server + docs: not checked.'
+  comes from the run only (docs page did not cover it). SQL Server docs: ''abc'' + NULL yields NULL (CONCAT_NULL_YIELDS_NULL
+  is always ON since SQL Server 2017).'
 sources:
 - url: https://dev.mysql.com/doc/refman/8.4/en/logical-operators.html
   title: 'MySQL 8.4: logical operators (||)'
   checked: '2026-10-18'
 - url: https://www.postgresql.org/docs/18/functions-string.html
   title: 'PostgreSQL 18: string functions (concat)'
+  checked: '2026-10-18'
+- url: https://learn.microsoft.com/en-us/sql/t-sql/statements/set-concat-null-yields-null-transact-sql
+  title: 'SQL Server: CONCAT_NULL_YIELDS_NULL (always ON since 2017)'
   checked: '2026-10-18'

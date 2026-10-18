@@ -1,0 +1,13 @@
+id: top-syntax
+title: TOP
+setup:
+- CREATE TABLE t (x INT)
+- INSERT INTO t VALUES (3), (1), (2)
+teardown:
+- DROP TABLE t
+cases:
+- name: SELECT TOP 2 x
+  sql: SELECT TOP 2 x FROM t ORDER BY x
+explanation: 'TOP works only on SQL Server; the other three reject it. Observed per the run only; docs:
+  not checked.'
+sources: []

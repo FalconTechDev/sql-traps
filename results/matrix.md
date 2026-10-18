@@ -1,4 +1,4 @@
-Run: 2026-10-18T15:54:00+00:00
+Run: 2026-10-18T15:58:07+00:00
 
 - mysql: 8.4.11
 - mariadb: 11.8.9-MariaDB-ubu2404
@@ -8,10 +8,15 @@ Run: 2026-10-18T15:54:00+00:00
 | trap / case | mysql | mariadb | postgres | mssql | differs |
 |---|---|---|---|---|---|
 | avg-int: AVG(x) over 1,2 | 1.5000 | 1.5000 | 1.5000000000000000 | 1 | YES |
+| boolean-result: SELECT 1 = 1 | 1 | 1 | True | ERROR: (102, b"Incorrect syntax near '='.DB-Lib error message 20018 | YES |
+| cast-float-int: CAST(2.7 AS INTEGER) | ERROR: (1064, "You have an error in your SQL syntax; check the manu | 3 | 3 | 2 | YES |
+| coalesce-type: COALESCE(NULL, 1, 'a') | 1 | 1 | ERROR: invalid input syntax for type integer: "a" LINE 1: SELECT CO | 1 | YES |
 | concat-null: 'a' || NULL | NULL | NULL | NULL | ERROR: (102, b"Incorrect syntax near '/'.DB-Lib error message 20018 | YES |
 | concat-null: CONCAT('a', NULL) | NULL | NULL | a | a | YES |
 | concat-null: 'a' + NULL | NULL | NULL | ERROR: operator is not unique: unknown + unknown LINE 1: SELECT 'a' | NULL | YES |
+| count-distinct-multi: COUNT(DISTINCT a, b) | 2 | 2 | ERROR: function count(integer, integer) does not exist LINE 1: SELE | ERROR: (102, b"Incorrect syntax near ','.DB-Lib error message 20018 | YES |
 | count-star-vs-col: counts | 3,2,1 | 3,2,1 | 3,2,1 | 3,2,1 | no |
+| date-add-month: DATE '2026-01-31' + INTERVAL '1' MONTH | 2026-02-28 | 2026-02-28 | 2026-02-28 00:00:00 | ERROR: (102, b"Incorrect syntax near '+'.DB-Lib error message 20018 | YES |
 | distinct-null: SELECT DISTINCT x | 2 | 2 | 2 | 2 | no |
 | distinct-null: WHERE x = x | 1 | 1 | 1 | 1 | no |
 | division-by-zero: SELECT 1 / 0 | NULL | NULL | ERROR: division by zero | ERROR: (8134, b'Divide by zero error encountered.DB-Lib error messa | YES |
@@ -25,14 +30,22 @@ Run: 2026-10-18T15:54:00+00:00
 | integer-division: 7 / 2 | 3.5000 | 3.5000 | 3 | 3 | YES |
 | integer-division: -7 / 2 | -3.5000 | -3.5000 | -3 | -3 | YES |
 | integer-division: 7 / 2.0 | 3.5000 | 3.5000 | 3.5000000000000000 | 3.500000 | YES |
+| intersect-all: 1 INTERSECT ALL 1 | 1 | 1 | 1 | ERROR: (324, b"The 'ALL' version of the INTERSECT operator is not s | YES |
 | length-trailing: LENGTH('abc ') | 4 | 4 | 4 | ERROR: (195, b"'LENGTH' is not a recognized built-in function name. | YES |
 | length-trailing: LEN('abc ') | ERROR: (1305, 'FUNCTION traps.LEN does not exist') | ERROR: (1305, 'FUNCTION traps.LEN does not exist') | ERROR: function len(unknown) does not exist LINE 1: SELECT LEN('abc | 3 | YES |
+| like-case: 'ABC' LIKE 'abc' | match | match | no match | match | YES |
+| limit-syntax: ORDER BY x LIMIT 2 | 1; 2 | 1; 2 | 1; 2 | ERROR: (102, b"Incorrect syntax near 'LIMIT'.DB-Lib error message 2 | YES |
+| mod-by-zero: 5 % 0 | NULL | NULL | ERROR: division by zero | ERROR: (8134, b'Divide by zero error encountered.DB-Lib error messa | YES |
 | not-in-null: rows of a not in b | (no rows) | (no rows) | (no rows) | (no rows) | no |
 | null-order: ORDER BY x | NULL; 1; 2 | NULL; 1; 2 | 1; 2; NULL | NULL; 1; 2 | YES |
 | null-order: ORDER BY x DESC | 2; 1; NULL | 2; 1; NULL | NULL; 2; 1 | 2; 1; NULL | YES |
 | round-half: ROUND(2.5,0), ROUND(-2.5,0) exact | 3,-3 | 3,-3 | 3,-3 | 3.0,-3.0 | YES |
+| string-agg: STRING_AGG(s, ',') | ERROR: (1305, 'FUNCTION traps.STRING_AGG does not exist') | ERROR: (1305, 'FUNCTION traps.STRING_AGG does not exist') | a,b | a,b | YES |
 | string-compare: 'a' = 'A' | equal | equal | different | equal | YES |
 | string-compare: 'a' = 'a ' (trailing space) | different | equal | different | equal | YES |
 | string-compare: 'a' = ' a' (leading space) | different | different | different | different | no |
+| string-order-case: 'abc' < 'ABC' | false | false | true | false | YES |
+| string-vs-zero: 'abc' = 0 | equal | equal | ERROR: invalid input syntax for type integer: "abc" LINE 1: SELECT  | ERROR: (245, b"Conversion failed when converting the varchar value  | YES |
 | substring-zero: SUBSTRING('abc', 0, 2) |  |  | a | a | YES |
+| top-syntax: SELECT TOP 2 x | ERROR: (1064, "You have an error in your SQL syntax; check the manu | ERROR: (1064, "You have an error in your SQL syntax; check the manu | ERROR: syntax error at or near "2" LINE 1: SELECT TOP 2 x FROM t OR | 1; 2 | YES |
 | window-default-frame: LAST_VALUE(x) OVER (ORDER BY x) | 1,1; 2,2; 3,3 | 1,1; 2,2; 3,3 | 1,1; 2,2; 3,3 | 1,1; 2,2; 3,3 | no |

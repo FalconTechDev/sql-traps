@@ -1,0 +1,8 @@
+id: date-add-month
+title: Adding a month at month end
+cases:
+- name: DATE '2026-01-31' + INTERVAL '1' MONTH
+  sql: SELECT DATE '2026-01-31' + INTERVAL '1' MONTH
+explanation: 'MySQL and MariaDB clamp to the month end (2026-02-28); PostgreSQL gives the same date with
+  a time part; SQL Server rejects the syntax. Observed per the run only; docs: not checked.'
+sources: []

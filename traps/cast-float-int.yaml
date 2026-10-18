@@ -1,0 +1,8 @@
+id: cast-float-int
+title: Casting a decimal to integer
+cases:
+- name: CAST(2.7 AS INTEGER)
+  sql: SELECT CAST(2.7 AS INTEGER)
+explanation: 'CAST(2.7 AS INTEGER): PostgreSQL and MariaDB give 3 (rounds), SQL Server 2 (truncates);
+  MySQL rejects INTEGER as a CAST target. Observed per the run only; docs: not checked.'
+sources: []

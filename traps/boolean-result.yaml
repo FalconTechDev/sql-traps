@@ -1,0 +1,8 @@
+id: boolean-result
+title: A comparison as a value
+cases:
+- name: SELECT 1 = 1
+  sql: SELECT 1 = 1
+explanation: 'MySQL/MariaDB return 1, PostgreSQL a boolean, SQL Server has no boolean expression as a
+  value and rejects the syntax. Observed per the run only; docs: not checked.'
+sources: []

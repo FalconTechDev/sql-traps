@@ -1,0 +1,8 @@
+id: string-order-case
+title: Ordering of upper and lower case
+cases:
+- name: '''abc'' < ''ABC'''
+  sql: SELECT CASE WHEN 'abc' < 'ABC' THEN 'true' ELSE 'false' END
+explanation: '''abc'' < ''ABC'' is true only on PostgreSQL (its default collation in this image sorts
+  lower case before upper case); false elsewhere. Observed per the run only; docs: not checked.'
+sources: []

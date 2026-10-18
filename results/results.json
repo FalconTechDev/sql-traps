@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-10-18T15:54:00+00:00",
+  "run_at": "2026-10-18T15:58:07+00:00",
   "engines": {
     "mysql": "8.4.11",
     "mariadb": "11.8.9-MariaDB-ubu2404",
@@ -31,6 +31,99 @@
                 "1.5000000000000000"
               ]
             ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "boolean-result": {
+      "title": "A comparison as a value",
+      "cases": {
+        "SELECT 1 = 1": {
+          "mysql": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "True"
+              ]
+            ]
+          },
+          "mssql": {
+            "error": "(102, b\"Incorrect syntax near '='.DB-Lib error message 20018, severity 15:\\nGeneral SQL Server error: Check messages from the SQL Server\\n\")"
+          }
+        }
+      }
+    },
+    "cast-float-int": {
+      "title": "Casting a decimal to integer",
+      "cases": {
+        "CAST(2.7 AS INTEGER)": {
+          "mysql": {
+            "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'INTEGER)' at line 1\")"
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "3"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "3"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "2"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "coalesce-type": {
+      "title": "COALESCE with mixed types",
+      "cases": {
+        "COALESCE(NULL, 1, 'a')": {
+          "mysql": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          },
+          "postgres": {
+            "error": "invalid input syntax for type integer: \"a\" LINE 1: SELECT COALESCE(NULL, 1, 'a') ^"
           },
           "mssql": {
             "rows": [
@@ -129,6 +222,33 @@
         }
       }
     },
+    "count-distinct-multi": {
+      "title": "COUNT(DISTINCT a, b)",
+      "cases": {
+        "COUNT(DISTINCT a, b)": {
+          "mysql": {
+            "rows": [
+              [
+                "2"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "2"
+              ]
+            ]
+          },
+          "postgres": {
+            "error": "function count(integer, integer) does not exist LINE 1: SELECT COUNT(DISTINCT a, b) FROM t ^ HINT: No function matches the given name and argument types. You might need to add explicit type casts."
+          },
+          "mssql": {
+            "error": "(102, b\"Incorrect syntax near ','.DB-Lib error message 20018, severity 15:\\nGeneral SQL Server error: Check messages from the SQL Server\\n\")"
+          }
+        }
+      }
+    },
     "count-star-vs-col": {
       "title": "COUNT(*) vs COUNT(col) vs COUNT(DISTINCT col)",
       "cases": {
@@ -168,6 +288,37 @@
                 "1"
               ]
             ]
+          }
+        }
+      }
+    },
+    "date-add-month": {
+      "title": "Adding a month at month end",
+      "cases": {
+        "DATE '2026-01-31' + INTERVAL '1' MONTH": {
+          "mysql": {
+            "rows": [
+              [
+                "2026-02-28"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "2026-02-28"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "2026-02-28 00:00:00"
+              ]
+            ]
+          },
+          "mssql": {
+            "error": "(102, b\"Incorrect syntax near '+'.DB-Lib error message 20018, severity 15:\\nGeneral SQL Server error: Check messages from the SQL Server\\n\")"
           }
         }
       }
@@ -564,6 +715,37 @@
         }
       }
     },
+    "intersect-all": {
+      "title": "INTERSECT ALL",
+      "cases": {
+        "1 INTERSECT ALL 1": {
+          "mysql": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          },
+          "mssql": {
+            "error": "(324, b\"The 'ALL' version of the INTERSECT operator is not supported.DB-Lib error message 20018, severity 15:\\nGeneral SQL Server error: Check messages from the SQL Server\\n\")"
+          }
+        }
+      }
+    },
     "length-trailing": {
       "title": "Length of a string with a trailing space",
       "cases": {
@@ -609,6 +791,108 @@
                 "3"
               ]
             ]
+          }
+        }
+      }
+    },
+    "like-case": {
+      "title": "LIKE and case",
+      "cases": {
+        "'ABC' LIKE 'abc'": {
+          "mysql": {
+            "rows": [
+              [
+                "match"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "match"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "no match"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "match"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "limit-syntax": {
+      "title": "LIMIT",
+      "cases": {
+        "ORDER BY x LIMIT 2": {
+          "mysql": {
+            "rows": [
+              [
+                "1"
+              ],
+              [
+                "2"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "1"
+              ],
+              [
+                "2"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "1"
+              ],
+              [
+                "2"
+              ]
+            ]
+          },
+          "mssql": {
+            "error": "(102, b\"Incorrect syntax near 'LIMIT'.DB-Lib error message 20018, severity 15:\\nGeneral SQL Server error: Check messages from the SQL Server\\n\")"
+          }
+        }
+      }
+    },
+    "mod-by-zero": {
+      "title": "Modulo by zero",
+      "cases": {
+        "5 % 0": {
+          "mysql": {
+            "rows": [
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "postgres": {
+            "error": "division by zero"
+          },
+          "mssql": {
+            "error": "(8134, b'Divide by zero error encountered.DB-Lib error message 20018, severity 16:\\nGeneral SQL Server error: Check messages from the SQL Server\\n')"
           }
         }
       }
@@ -784,6 +1068,33 @@
         }
       }
     },
+    "string-agg": {
+      "title": "STRING_AGG",
+      "cases": {
+        "STRING_AGG(s, ',')": {
+          "mysql": {
+            "error": "(1305, 'FUNCTION traps.STRING_AGG does not exist')"
+          },
+          "mariadb": {
+            "error": "(1305, 'FUNCTION traps.STRING_AGG does not exist')"
+          },
+          "postgres": {
+            "rows": [
+              [
+                "a,b"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "a,b"
+              ]
+            ]
+          }
+        }
+      }
+    },
     "string-compare": {
       "title": "Case and trailing spaces in string comparison",
       "cases": {
@@ -879,6 +1190,68 @@
         }
       }
     },
+    "string-order-case": {
+      "title": "Ordering of upper and lower case",
+      "cases": {
+        "'abc' < 'ABC'": {
+          "mysql": {
+            "rows": [
+              [
+                "false"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "false"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "true"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "false"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "string-vs-zero": {
+      "title": "String compared with a number",
+      "cases": {
+        "'abc' = 0": {
+          "mysql": {
+            "rows": [
+              [
+                "equal"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "equal"
+              ]
+            ]
+          },
+          "postgres": {
+            "error": "invalid input syntax for type integer: \"abc\" LINE 1: SELECT CASE WHEN 'abc' = 0 THEN 'equal' ELSE 'different' END ^"
+          },
+          "mssql": {
+            "error": "(245, b\"Conversion failed when converting the varchar value 'abc' to data type int.DB-Lib error message 20018, severity 16:\\nGeneral SQL Server error: Check messages from the SQL Server\\n\")"
+          }
+        }
+      }
+    },
     "substring-zero": {
       "title": "SUBSTRING with start position 0",
       "cases": {
@@ -908,6 +1281,32 @@
             "rows": [
               [
                 "a"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "top-syntax": {
+      "title": "TOP",
+      "cases": {
+        "SELECT TOP 2 x": {
+          "mysql": {
+            "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '2 x FROM t ORDER BY x' at line 1\")"
+          },
+          "mariadb": {
+            "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '2 x FROM t ORDER BY x' at line 1\")"
+          },
+          "postgres": {
+            "error": "syntax error at or near \"2\" LINE 1: SELECT TOP 2 x FROM t ORDER BY x ^"
+          },
+          "mssql": {
+            "rows": [
+              [
+                "1"
+              ],
+              [
+                "2"
               ]
             ]
           }

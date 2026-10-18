@@ -1,0 +1,13 @@
+id: limit-syntax
+title: LIMIT
+setup:
+- CREATE TABLE t (x INT)
+- INSERT INTO t VALUES (3), (1), (2)
+teardown:
+- DROP TABLE t
+cases:
+- name: ORDER BY x LIMIT 2
+  sql: SELECT x FROM t ORDER BY x LIMIT 2
+explanation: 'LIMIT works on MySQL, MariaDB and PostgreSQL; SQL Server rejects it. Observed per the run
+  only; docs: not checked.'
+sources: []

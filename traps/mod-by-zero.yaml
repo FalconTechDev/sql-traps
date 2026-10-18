@@ -1,0 +1,8 @@
+id: mod-by-zero
+title: Modulo by zero
+cases:
+- name: 5 % 0
+  sql: SELECT 5 % 0
+explanation: 'Same split as division by zero: MySQL/MariaDB give NULL, PostgreSQL and SQL Server raise
+  an error. Observed per the run only; docs: not checked.'
+sources: []

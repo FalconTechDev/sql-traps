@@ -1,0 +1,8 @@
+id: like-case
+title: LIKE and case
+cases:
+- name: '''ABC'' LIKE ''abc'''
+  sql: SELECT CASE WHEN 'ABC' LIKE 'abc' THEN 'match' ELSE 'no match' END
+explanation: 'LIKE is case-insensitive on MySQL, MariaDB and SQL Server with default collations here,
+  case-sensitive on PostgreSQL. Observed per the run only; docs: not checked.'
+sources: []

@@ -1,0 +1,8 @@
+id: string-vs-zero
+title: String compared with a number
+cases:
+- name: '''abc'' = 0'
+  sql: SELECT CASE WHEN 'abc' = 0 THEN 'equal' ELSE 'different' END
+explanation: 'MySQL/MariaDB convert ''abc'' to 0, so ''abc'' = 0 is true; PostgreSQL and SQL Server raise
+  a conversion error. Observed per the run only; docs: not checked.'
+sources: []

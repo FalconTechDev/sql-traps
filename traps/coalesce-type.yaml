@@ -1,0 +1,8 @@
+id: coalesce-type
+title: COALESCE with mixed types
+cases:
+- name: COALESCE(NULL, 1, 'a')
+  sql: SELECT COALESCE(NULL, 1, 'a')
+explanation: 'MySQL/MariaDB/SQL Server return 1 (types are unified differently); PostgreSQL tries to resolve
+  everything to one type and fails on ''a''. Observed per the run only; docs: not checked.'
+sources: []

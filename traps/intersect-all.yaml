@@ -1,0 +1,8 @@
+id: intersect-all
+title: INTERSECT ALL
+cases:
+- name: 1 INTERSECT ALL 1
+  sql: SELECT 1 INTERSECT ALL SELECT 1
+explanation: 'INTERSECT ALL works on MySQL, MariaDB and PostgreSQL in this run; SQL Server rejects the
+  ALL version. Observed per the run only; docs: not checked.'
+sources: []

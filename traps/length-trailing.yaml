@@ -5,6 +5,9 @@ cases:
   sql: SELECT LENGTH('abc ')
 - name: LEN('abc ')
   sql: SELECT LEN('abc ')
-explanation: 'Observed per the run only: the function names and trailing-space handling differ (SQL Server
-  has LEN, others LENGTH). Docs: not checked.'
-sources: []
+explanation: 'SQL Server has no LENGTH; its LEN excludes trailing spaces (docs), so LEN(''abc '') is 3
+  while LENGTH(''abc '') counts 4 elsewhere. Docs for the other engines: not checked.'
+sources:
+- url: https://learn.microsoft.com/en-us/sql/t-sql/functions/len-transact-sql
+  title: 'SQL Server: LEN'
+  checked: '2026-10-18'

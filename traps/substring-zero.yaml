@@ -3,6 +3,14 @@ title: SUBSTRING with start position 0
 cases:
 - name: SUBSTRING('abc', 0, 2)
   sql: SELECT SUBSTRING('abc', 0, 2)
-explanation: 'Observed per the run only: engines disagree on whether position 0 is before the first character.
-  Docs: not checked.'
-sources: []
+explanation: 'MySQL/MariaDB return an empty string for position 0 (MySQL docs: pos 0 returns an empty
+  string). SQL Server docs: if start is less than 1 the result begins at the first character and the length
+  counts from start, so SUBSTRING(''abc'',0,2) gives ''a''; PostgreSQL gives ''a'' too in this run (its
+  docs: not checked). MariaDB docs: not checked.'
+sources:
+- url: https://dev.mysql.com/doc/refman/8.4/en/string-functions.html
+  title: 'MySQL 8.4: string functions (SUBSTRING)'
+  checked: '2026-10-18'
+- url: https://learn.microsoft.com/en-us/sql/t-sql/functions/substring-transact-sql
+  title: 'SQL Server: SUBSTRING'
+  checked: '2026-10-18'
