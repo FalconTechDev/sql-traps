@@ -10,7 +10,7 @@ engines = list(d["engines"])
 def cell(v):
     if "error" in v:
         return "ERROR: " + v["error"][:60].replace("|", "/")
-    return "; ".join(",".join(r) for r in v["rows"]) or "(no rows)"
+    return "; ".join(",".join(r) for r in v["rows"]) if v["rows"] else "(no rows)"
 
 
 lines = [f"Run: {d['run_at']}", ""]

@@ -1,0 +1,13 @@
+id: avg-int
+title: AVG of an integer column
+setup:
+- CREATE TABLE t (x INT)
+- INSERT INTO t VALUES (1), (2)
+teardown:
+- DROP TABLE t
+cases:
+- name: AVG(x) over 1,2
+  sql: SELECT AVG(x) FROM t
+explanation: 'Observed per the run only: the result type of AVG over INT differs (integer vs decimal).
+  Docs: not checked.'
+sources: []

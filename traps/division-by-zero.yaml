@@ -1,0 +1,12 @@
+id: division-by-zero
+title: Division by zero
+cases:
+- name: SELECT 1 / 0
+  sql: SELECT 1 / 0
+explanation: 'MySQL docs: division by zero returns NULL. See result: MariaDB behaves the same, PostgreSQL
+  and SQL Server raise an error. Other engines'' docs: not checked. Note: MySQL''s behaviour depends on
+  sql_mode (ERROR_FOR_DIVISION_BY_ZERO) and applies to SELECT here; INSERT/UPDATE: not tested.'
+sources:
+- url: https://dev.mysql.com/doc/refman/8.4/en/arithmetic-functions.html
+  title: 'MySQL 8.4: arithmetic operators'
+  checked: '2026-10-18'

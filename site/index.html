@@ -1,10 +1,14 @@
 <!doctype html><meta charset=utf-8><title>sql-traps</title>
 <style>body{font:15px system-ui;max-width:1100px;margin:2em auto;padding:0 1em}table{border-collapse:collapse;width:100%}td,th{border:1px solid #bbb;padding:4px 8px;vertical-align:top}.diff{background:#fff3cd}.err{color:#b00020}</style>
-<h1>sql-traps</h1><p>Run at 2026-10-18T15:36:37+00:00. Every cell is an actual query result.</p><ul>
+<h1>sql-traps</h1><p>Run at 2026-10-18T15:54:00+00:00. Every cell is an actual query result.</p><ul>
 <li><b>mysql</b>: 8.4.11</li>
 <li><b>mariadb</b>: 11.8.9-MariaDB-ubu2404</li>
 <li><b>postgres</b>: PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 1</li>
 <li><b>mssql</b>: Microsoft SQL Server 2022 (RTM-CU27-GDR) (KB5126934) - 16.0.4305.5 (X64) Oct 2 2026 17:28:</li>
+</ul>
+<h2 id=avg-int>AVG of an integer column</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>AVG(x) over 1,2</td><td>1.5000</td><td>1.5000</td><td>1.5000000000000000</td><td>1</td></tr>
+</table><p>Observed per the run only: the result type of AVG over INT differs (integer vs decimal). Docs: not checked.</p><ul>
 </ul>
 <h2 id=concat-null>String concatenation with NULL</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
 <tr class=diff><td>&#x27;a&#x27; || NULL</td><td>NULL</td><td>NULL</td><td>NULL</td><td class=err>ERROR: (102, b&quot;Incorrect syntax near &#x27;|&#x27;.DB-Lib error message 20018, severity 15:\nGene</td></tr>
@@ -22,6 +26,11 @@
 <tr><td>SELECT DISTINCT x</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
 <tr><td>WHERE x = x</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
 </table><p>Control case: DISTINCT collapses NULLs into one group (2 rows), while x = x is not true for NULL (1 row). Identical on all four. Doc link: not checked.</p><ul>
+</ul>
+<h2 id=division-by-zero>Division by zero</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>SELECT 1 / 0</td><td>NULL</td><td>NULL</td><td class=err>ERROR: division by zero</td><td class=err>ERROR: (8134, b&#x27;Divide by zero error encountered.DB-Lib error message 20018, severity 1</td></tr>
+</table><p>MySQL docs: division by zero returns NULL. See result: MariaDB behaves the same, PostgreSQL and SQL Server raise an error. Other engines&#x27; docs: not checked. Note: MySQL&#x27;s behaviour depends on sql_mode (ERROR_FOR_DIVISION_BY_ZERO) and applies to SELECT here; INSERT/UPDATE: not tested.</p><ul>
+<li><a href='https://dev.mysql.com/doc/refman/8.4/en/arithmetic-functions.html'>MySQL 8.4: arithmetic operators</a> (checked 2026-10-18)</li>
 </ul>
 <h2 id=fetch-with-ties>Standard FETCH FIRST ... WITH TIES</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
 <tr class=diff><td>ORDER BY x FETCH FIRST 2 ROWS WITH TIES</td><td class=err>ERROR: (1064, &quot;You have an error in your SQL syntax; check the manual that corresponds </td><td>1; 2; 2</td><td>1; 2; 2</td><td class=err>ERROR: (153, b&#x27;Invalid usage of the option FIRST in the FETCH statement.DB-Lib error me</td></tr>
@@ -41,12 +50,21 @@
 <tr><td>&#x27;2&#x27; &gt; &#x27;10&#x27; (two strings)</td><td>true</td><td>true</td><td>true</td><td>true</td></tr>
 </table><p>MySQL/MariaDB coerce &#x27;10abc&#x27; to a number (15.0); PostgreSQL and SQL Server raise a conversion error. Docs on conversion rules: not checked.</p><ul>
 </ul>
+<h2 id=int-overflow>Integer overflow in arithmetic</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>2147483647 + 1</td><td>2147483648</td><td>2147483648</td><td class=err>ERROR: integer out of range</td><td class=err>ERROR: (8115, b&#x27;Arithmetic overflow error converting expression to data type int.DB-Lib</td></tr>
+</table><p>Observed per the run only: engines either widen the type or raise an overflow error. Docs: not checked.</p><ul>
+</ul>
 <h2 id=integer-division>Integer division</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
 <tr class=diff><td>7 / 2</td><td>3.5000</td><td>3.5000</td><td>3</td><td>3</td></tr>
 <tr class=diff><td>-7 / 2</td><td>-3.5000</td><td>-3.5000</td><td>-3</td><td>-3</td></tr>
 <tr class=diff><td>7 / 2.0</td><td>3.5000</td><td>3.5000</td><td>3.5000000000000000</td><td>3.500000</td></tr>
 </table><p>MySQL/MariaDB return an exact decimal for 7/2 (3.5000); PostgreSQL and SQL Server truncate integers (3). MySQL docs: / does not return an integer, DIV does integer division. PostgreSQL/SQL Server docs for truncation: not checked.</p><ul>
 <li><a href='https://dev.mysql.com/doc/refman/8.4/en/arithmetic-functions.html'>MySQL 8.4: arithmetic operators</a> (checked 2026-10-18)</li>
+</ul>
+<h2 id=length-trailing>Length of a string with a trailing space</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>LENGTH(&#x27;abc &#x27;)</td><td>4</td><td>4</td><td>4</td><td class=err>ERROR: (195, b&quot;&#x27;LENGTH&#x27; is not a recognized built-in function name.DB-Lib error message</td></tr>
+<tr class=diff><td>LEN(&#x27;abc &#x27;)</td><td class=err>ERROR: (1305, &#x27;FUNCTION traps.LEN does not exist&#x27;)</td><td class=err>ERROR: (1305, &#x27;FUNCTION traps.LEN does not exist&#x27;)</td><td class=err>ERROR: function len(unknown) does not exist LINE 1: SELECT LEN(&#x27;abc &#x27;) ^ HINT: No funct</td><td>3</td></tr>
+</table><p>Observed per the run only: the function names and trailing-space handling differ (SQL Server has LEN, others LENGTH). Docs: not checked.</p><ul>
 </ul>
 <h2 id=not-in-null>NOT IN with NULL in the subquery</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
 <tr><td>rows of a not in b</td><td>(no rows)</td><td>(no rows)</td><td>(no rows)</td><td>(no rows)</td></tr>
@@ -60,12 +78,20 @@
 <li><a href='https://www.postgresql.org/docs/18/queries-order.html'>PostgreSQL 18: sorting rows</a> (checked 2026-10-18)</li>
 <li><a href='https://learn.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql?view=sql-server-ver16'>SQL Server: ORDER BY (NULLs lowest)</a> (checked 2026-10-18)</li>
 </ul>
+<h2 id=round-half>ROUND of x.5 values</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>ROUND(2.5,0), ROUND(-2.5,0) exact</td><td>3,-3</td><td>3,-3</td><td>3,-3</td><td>3.0,-3.0</td></tr>
+</table><p>Observed per the run only: rounding of exact x.5 values (round half away from zero vs other). Docs: not checked.</p><ul>
+</ul>
 <h2 id=string-compare>Case and trailing spaces in string comparison</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
 <tr class=diff><td>&#x27;a&#x27; = &#x27;A&#x27;</td><td>equal</td><td>equal</td><td>different</td><td>equal</td></tr>
 <tr class=diff><td>&#x27;a&#x27; = &#x27;a &#x27; (trailing space)</td><td>different</td><td>equal</td><td>different</td><td>equal</td></tr>
 <tr><td>&#x27;a&#x27; = &#x27; a&#x27; (leading space)</td><td>different</td><td>different</td><td>different</td><td>different</td></tr>
 </table><p>PostgreSQL is case-sensitive for &#x27;a&#x27;=&#x27;A&#x27;; the others (default collations of these images) are not. Trailing space: MySQL 8.4 differs, MariaDB and SQL Server ignore it. MySQL docs: PAD SPACE collations ignore trailing spaces, NO PAD ones do not; Unicode UCA 9.0.0+ collations are NO PAD, which matches the MySQL 8.4 result. Why MariaDB and SQL Server behave so: not checked.</p><ul>
 <li><a href='https://dev.mysql.com/doc/refman/8.4/en/char.html'>MySQL 8.4: CHAR and VARCHAR types (trailing spaces)</a> (checked 2026-10-18)</li>
+</ul>
+<h2 id=substring-zero>SUBSTRING with start position 0</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>SUBSTRING(&#x27;abc&#x27;, 0, 2)</td><td></td><td></td><td>a</td><td>a</td></tr>
+</table><p>Observed per the run only: engines disagree on whether position 0 is before the first character. Docs: not checked.</p><ul>
 </ul>
 <h2 id=window-default-frame>Default window frame of LAST_VALUE</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
 <tr><td>LAST_VALUE(x) OVER (ORDER BY x)</td><td>1,1; 2,2; 3,3</td><td>1,1; 2,2; 3,3</td><td>1,1; 2,2; 3,3</td><td>1,1; 2,2; 3,3</td></tr>

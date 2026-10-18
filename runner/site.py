@@ -11,7 +11,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 def cell_text(v):
     if "error" in v:
         return "ERROR: " + v["error"][:80]
-    return "; ".join(",".join(r) for r in v["rows"]) or "(no rows)"
+    return "; ".join(",".join(r) for r in v["rows"]) if v["rows"] else "(no rows)"
 
 
 def build(root=ROOT):

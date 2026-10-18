@@ -1,0 +1,8 @@
+id: round-half
+title: ROUND of x.5 values
+cases:
+- name: ROUND(2.5,0), ROUND(-2.5,0) exact
+  sql: SELECT ROUND(2.5, 0), ROUND(-2.5, 0)
+explanation: 'Observed per the run only: rounding of exact x.5 values (round half away from zero vs other).
+  Docs: not checked.'
+sources: []

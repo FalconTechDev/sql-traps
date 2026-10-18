@@ -1,0 +1,10 @@
+id: length-trailing
+title: Length of a string with a trailing space
+cases:
+- name: LENGTH('abc ')
+  sql: SELECT LENGTH('abc ')
+- name: LEN('abc ')
+  sql: SELECT LEN('abc ')
+explanation: 'Observed per the run only: the function names and trailing-space handling differ (SQL Server
+  has LEN, others LENGTH). Docs: not checked.'
+sources: []
