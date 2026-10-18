@@ -1,0 +1,20 @@
+id: not-in-null
+title: NOT IN with NULL in the subquery
+setup:
+- CREATE TABLE a (x INT)
+- CREATE TABLE b (y INT)
+- INSERT INTO a VALUES (1), (2), (3)
+- INSERT INTO b VALUES (1), (NULL)
+teardown:
+- DROP TABLE a
+- DROP TABLE b
+cases:
+- name: rows of a not in b
+  sql: SELECT x FROM a WHERE x NOT IN (SELECT y FROM b) ORDER BY x
+explanation: 'If the subquery returns a NULL and no value matches, NOT IN yields NULL rather than true,
+  so the row is silently dropped. All four engines returned zero rows here. Source covers PostgreSQL only;
+  other engines'' docs: not checked.'
+sources:
+- url: https://www.postgresql.org/docs/18/functions-subquery.html
+  title: 'PostgreSQL 18: subquery expressions'
+  checked: '2026-10-18'

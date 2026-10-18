@@ -1,0 +1,13 @@
+id: count-star-vs-col
+title: COUNT(*) vs COUNT(col) vs COUNT(DISTINCT col)
+setup:
+- CREATE TABLE t (x INT)
+- INSERT INTO t VALUES (1), (1), (NULL)
+teardown:
+- DROP TABLE t
+cases:
+- name: counts
+  sql: SELECT COUNT(*), COUNT(x), COUNT(DISTINCT x) FROM t
+explanation: 'Identical on all four engines in this run: COUNT(*) counts rows, COUNT(col) skips NULLs.
+  Control case: no divergence. Doc link: not checked.'
+sources: []

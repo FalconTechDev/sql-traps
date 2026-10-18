@@ -1,0 +1,17 @@
+id: window-default-frame
+title: Default window frame of LAST_VALUE
+setup:
+- CREATE TABLE t (x INT)
+- INSERT INTO t VALUES (1), (2), (3)
+teardown:
+- DROP TABLE t
+cases:
+- name: LAST_VALUE(x) OVER (ORDER BY x)
+  sql: SELECT x, LAST_VALUE(x) OVER (ORDER BY x) FROM t ORDER BY x
+explanation: 'With ORDER BY the default frame is RANGE UNBOUNDED PRECEDING to CURRENT ROW (through the
+  last peer), so LAST_VALUE returns the current row, not the partition''s last row. All four engines agree
+  on this data: no divergence. Docs cited: PostgreSQL only.'
+sources:
+- url: https://www.postgresql.org/docs/18/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS
+  title: 'PostgreSQL 18: window function calls'
+  checked: '2026-10-18'

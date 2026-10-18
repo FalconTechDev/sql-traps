@@ -1,0 +1,17 @@
+id: string-compare
+title: Case and trailing spaces in string comparison
+cases:
+- name: '''a'' = ''A'''
+  sql: SELECT CASE WHEN 'a' = 'A' THEN 'equal' ELSE 'different' END
+- name: '''a'' = ''a '' (trailing space)'
+  sql: SELECT CASE WHEN 'a' = 'a ' THEN 'equal' ELSE 'different' END
+- name: '''a'' = '' a'' (leading space)'
+  sql: SELECT CASE WHEN 'a' = ' a' THEN 'equal' ELSE 'different' END
+explanation: 'PostgreSQL is case-sensitive for ''a''=''A''; the others (default collations of these images)
+  are not. Trailing space: MySQL 8.4 differs, MariaDB and SQL Server ignore it. MySQL docs: PAD SPACE
+  collations ignore trailing spaces, NO PAD ones do not; Unicode UCA 9.0.0+ collations are NO PAD, which
+  matches the MySQL 8.4 result. Why MariaDB and SQL Server behave so: not checked.'
+sources:
+- url: https://dev.mysql.com/doc/refman/8.4/en/char.html
+  title: 'MySQL 8.4: CHAR and VARCHAR types (trailing spaces)'
+  checked: '2026-10-18'

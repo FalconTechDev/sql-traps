@@ -1,0 +1,15 @@
+id: distinct-null
+title: DISTINCT and UNION treat NULLs as equal
+setup:
+- CREATE TABLE t (x INT)
+- INSERT INTO t VALUES (NULL), (NULL), (1)
+teardown:
+- DROP TABLE t
+cases:
+- name: SELECT DISTINCT x
+  sql: SELECT COUNT(*) FROM (SELECT DISTINCT x FROM t) d
+- name: WHERE x = x
+  sql: SELECT COUNT(*) FROM t WHERE x = x
+explanation: 'Control case: DISTINCT collapses NULLs into one group (2 rows), while x = x is not true
+  for NULL (1 row). Identical on all four. Doc link: not checked.'
+sources: []

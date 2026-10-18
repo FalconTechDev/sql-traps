@@ -1,0 +1,20 @@
+id: group-by-nonagg
+title: Selecting a non-grouped column
+setup:
+- CREATE TABLE t (a INT, b INT)
+- INSERT INTO t VALUES (1, 10), (1, 20)
+teardown:
+- DROP TABLE t
+cases:
+- name: SELECT a, b ... GROUP BY a
+  sql: SELECT a, b FROM t GROUP BY a
+explanation: 'MySQL 8.4 rejects it by default (ONLY_FULL_GROUP_BY); MariaDB 11.8 accepts it and returns
+  an arbitrary b (here 10); PostgreSQL and SQL Server reject it. MariaDB docs: ONLY_FULL_GROUP_BY is not
+  in its default sql_mode.'
+sources:
+- url: https://dev.mysql.com/doc/refman/8.4/en/group-by-handling.html
+  title: 'MySQL 8.4: GROUP BY handling'
+  checked: '2026-10-18'
+- url: https://mariadb.com/kb/en/sql-mode/
+  title: 'MariaDB: sql_mode'
+  checked: '2026-10-18'

@@ -1,0 +1,19 @@
+name: nightly
+on:
+  push:
+  schedule: [{cron: "0 3 * * *"}]
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements.txt
+      - run: pytest -q tests
+      - run: docker compose up -d
+      - run: python runner/runner.py
+      - run: python runner/matrix.py && python runner/site.py
+      - uses: actions/upload-artifact@v4
+        with: {name: site, path: "site/\nresults/"}

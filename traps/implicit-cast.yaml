@@ -1,0 +1,12 @@
+id: implicit-cast
+title: Implicit type conversion
+cases:
+- name: '''10'' + 5'
+  sql: SELECT '10' + 5
+- name: '''10abc'' + 5'
+  sql: SELECT '10abc' + 5
+- name: '''2'' > ''10'' (two strings)'
+  sql: SELECT CASE WHEN '2' > '10' THEN 'true' ELSE 'false' END
+explanation: 'MySQL/MariaDB coerce ''10abc'' to a number (15.0); PostgreSQL and SQL Server raise a conversion
+  error. Docs on conversion rules: not checked.'
+sources: []

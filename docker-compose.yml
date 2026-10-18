@@ -1,0 +1,17 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment: {MYSQL_ROOT_PASSWORD: Traps_pass1, MYSQL_DATABASE: traps}
+    ports: ["33306:3306"]
+  mariadb:
+    image: mariadb:11.8
+    environment: {MARIADB_ROOT_PASSWORD: Traps_pass1, MARIADB_DATABASE: traps}
+    ports: ["33307:3306"]
+  postgres:
+    image: postgres:18
+    environment: {POSTGRES_PASSWORD: Traps_pass1, POSTGRES_DB: traps}
+    ports: ["35432:5432"]
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment: {ACCEPT_EULA: "Y", MSSQL_SA_PASSWORD: Traps_pass1}
+    ports: ["31433:1433"]

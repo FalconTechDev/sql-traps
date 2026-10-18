@@ -1,0 +1,21 @@
+id: null-order
+title: Position of NULL in ORDER BY
+setup:
+- CREATE TABLE t (x INT)
+- INSERT INTO t VALUES (2), (NULL), (1)
+teardown:
+- DROP TABLE t
+cases:
+- name: ORDER BY x
+  sql: SELECT x FROM t ORDER BY x
+- name: ORDER BY x DESC
+  sql: SELECT x FROM t ORDER BY x DESC
+explanation: 'Ascending, NULL sorts first in MySQL, MariaDB and SQL Server (docs: lowest) and last in
+  PostgreSQL (docs: larger than any value; NULLS FIRST/LAST override). MySQL/MariaDB docs: not checked.'
+sources:
+- url: https://www.postgresql.org/docs/18/queries-order.html
+  title: 'PostgreSQL 18: sorting rows'
+  checked: '2026-10-18'
+- url: https://learn.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql?view=sql-server-ver16
+  title: 'SQL Server: ORDER BY (NULLs lowest)'
+  checked: '2026-10-18'

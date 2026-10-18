@@ -1,0 +1,777 @@
+{
+  "run_at": "2026-10-18T15:36:37+00:00",
+  "engines": {
+    "mysql": "8.4.11",
+    "mariadb": "11.8.9-MariaDB-ubu2404",
+    "postgres": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "mssql": "Microsoft SQL Server 2022 (RTM-CU27-GDR) (KB5126934) - 16.0.4305.5 (X64) Oct 2 2026 17:28:11 Copyright (C) 2022 Microsoft Corporation Developer Edition (64-bit) on Linux (Ubuntu 22.04.5 LTS) <X64>"
+  },
+  "traps": {
+    "concat-null": {
+      "title": "String concatenation with NULL",
+      "cases": {
+        "'a' || NULL": {
+          "mysql": {
+            "rows": [
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "mssql": {
+            "error": "(102, b\"Incorrect syntax near '|'.DB-Lib error message 20018, severity 15:\\nGeneral SQL Server error: Check messages from the SQL Server\\n\")"
+          }
+        },
+        "CONCAT('a', NULL)": {
+          "mysql": {
+            "rows": [
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "a"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "a"
+              ]
+            ]
+          }
+        },
+        "'a' + NULL": {
+          "mysql": {
+            "rows": [
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "postgres": {
+            "error": "operator is not unique: unknown + unknown LINE 1: SELECT 'a' + NULL ^ HINT: Could not choose a best candidate operator. You might need to add explicit type casts."
+          },
+          "mssql": {
+            "rows": [
+              [
+                "NULL"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "count-star-vs-col": {
+      "title": "COUNT(*) vs COUNT(col) vs COUNT(DISTINCT col)",
+      "cases": {
+        "counts": {
+          "mysql": {
+            "rows": [
+              [
+                "3",
+                "2",
+                "1"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "3",
+                "2",
+                "1"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "3",
+                "2",
+                "1"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "3",
+                "2",
+                "1"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "distinct-null": {
+      "title": "DISTINCT and UNION treat NULLs as equal",
+      "cases": {
+        "SELECT DISTINCT x": {
+          "mysql": {
+            "rows": [
+              [
+                "2"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "2"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "2"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "2"
+              ]
+            ]
+          }
+        },
+        "WHERE x = x": {
+          "mysql": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "1"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "fetch-with-ties": {
+      "title": "Standard FETCH FIRST ... WITH TIES",
+      "cases": {
+        "ORDER BY x FETCH FIRST 2 ROWS WITH TIES": {
+          "mysql": {
+            "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FETCH FIRST 2 ROWS WITH TIES' at line 1\")"
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "1"
+              ],
+              [
+                "2"
+              ],
+              [
+                "2"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "1"
+              ],
+              [
+                "2"
+              ],
+              [
+                "2"
+              ]
+            ]
+          },
+          "mssql": {
+            "error": "(153, b'Invalid usage of the option FIRST in the FETCH statement.DB-Lib error message 20018, severity 15:\\nGeneral SQL Server error: Check messages from the SQL Server\\nDB-Lib error message 20018, severity 15:\\nGeneral SQL Server error: Check messages from the SQL Server\\n')"
+          }
+        },
+        "ORDER BY x FETCH FIRST 2 ROWS ONLY": {
+          "mysql": {
+            "error": "(1064, \"You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FETCH FIRST 2 ROWS ONLY' at line 1\")"
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "1"
+              ],
+              [
+                "2"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "1"
+              ],
+              [
+                "2"
+              ]
+            ]
+          },
+          "mssql": {
+            "error": "(153, b'Invalid usage of the option FIRST in the FETCH statement.DB-Lib error message 20018, severity 15:\\nGeneral SQL Server error: Check messages from the SQL Server\\n')"
+          }
+        }
+      }
+    },
+    "group-by-nonagg": {
+      "title": "Selecting a non-grouped column",
+      "cases": {
+        "SELECT a, b ... GROUP BY a": {
+          "mysql": {
+            "error": "(1055, \"Expression #2 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'traps.t.b' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by\")"
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "1",
+                "10"
+              ]
+            ]
+          },
+          "postgres": {
+            "error": "column \"t.b\" must appear in the GROUP BY clause or be used in an aggregate function LINE 1: SELECT a, b FROM t GROUP BY a ^"
+          },
+          "mssql": {
+            "error": "(8120, b\"Column 't.b' is invalid in the select list because it is not contained in either an aggregate function or the GROUP BY clause.DB-Lib error message 20018, severity 16:\\nGeneral SQL Server error: Check messages from the SQL Server\\n\")"
+          }
+        }
+      }
+    },
+    "implicit-cast": {
+      "title": "Implicit type conversion",
+      "cases": {
+        "'10' + 5": {
+          "mysql": {
+            "rows": [
+              [
+                "15.0"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "15.0"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "15"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "15"
+              ]
+            ]
+          }
+        },
+        "'10abc' + 5": {
+          "mysql": {
+            "rows": [
+              [
+                "15.0"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "15.0"
+              ]
+            ]
+          },
+          "postgres": {
+            "error": "invalid input syntax for type integer: \"10abc\" LINE 1: SELECT '10abc' + 5 ^"
+          },
+          "mssql": {
+            "error": "(245, b\"Conversion failed when converting the varchar value '10abc' to data type int.DB-Lib error message 20018, severity 16:\\nGeneral SQL Server error: Check messages from the SQL Server\\n\")"
+          }
+        },
+        "'2' > '10' (two strings)": {
+          "mysql": {
+            "rows": [
+              [
+                "true"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "true"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "true"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "true"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "integer-division": {
+      "title": "Integer division",
+      "cases": {
+        "7 / 2": {
+          "mysql": {
+            "rows": [
+              [
+                "3.5000"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "3.5000"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "3"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "3"
+              ]
+            ]
+          }
+        },
+        "-7 / 2": {
+          "mysql": {
+            "rows": [
+              [
+                "-3.5000"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "-3.5000"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "-3"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "-3"
+              ]
+            ]
+          }
+        },
+        "7 / 2.0": {
+          "mysql": {
+            "rows": [
+              [
+                "3.5000"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "3.5000"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "3.5000000000000000"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "3.500000"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "not-in-null": {
+      "title": "NOT IN with NULL in the subquery",
+      "cases": {
+        "rows of a not in b": {
+          "mysql": {
+            "rows": []
+          },
+          "mariadb": {
+            "rows": []
+          },
+          "postgres": {
+            "rows": []
+          },
+          "mssql": {
+            "rows": []
+          }
+        }
+      }
+    },
+    "null-order": {
+      "title": "Position of NULL in ORDER BY",
+      "cases": {
+        "ORDER BY x": {
+          "mysql": {
+            "rows": [
+              [
+                "NULL"
+              ],
+              [
+                "1"
+              ],
+              [
+                "2"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "NULL"
+              ],
+              [
+                "1"
+              ],
+              [
+                "2"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "1"
+              ],
+              [
+                "2"
+              ],
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "NULL"
+              ],
+              [
+                "1"
+              ],
+              [
+                "2"
+              ]
+            ]
+          }
+        },
+        "ORDER BY x DESC": {
+          "mysql": {
+            "rows": [
+              [
+                "2"
+              ],
+              [
+                "1"
+              ],
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "2"
+              ],
+              [
+                "1"
+              ],
+              [
+                "NULL"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "NULL"
+              ],
+              [
+                "2"
+              ],
+              [
+                "1"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "2"
+              ],
+              [
+                "1"
+              ],
+              [
+                "NULL"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "string-compare": {
+      "title": "Case and trailing spaces in string comparison",
+      "cases": {
+        "'a' = 'A'": {
+          "mysql": {
+            "rows": [
+              [
+                "equal"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "equal"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "different"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "equal"
+              ]
+            ]
+          }
+        },
+        "'a' = 'a ' (trailing space)": {
+          "mysql": {
+            "rows": [
+              [
+                "different"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "equal"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "different"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "equal"
+              ]
+            ]
+          }
+        },
+        "'a' = ' a' (leading space)": {
+          "mysql": {
+            "rows": [
+              [
+                "different"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "different"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "different"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "different"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "window-default-frame": {
+      "title": "Default window frame of LAST_VALUE",
+      "cases": {
+        "LAST_VALUE(x) OVER (ORDER BY x)": {
+          "mysql": {
+            "rows": [
+              [
+                "1",
+                "1"
+              ],
+              [
+                "2",
+                "2"
+              ],
+              [
+                "3",
+                "3"
+              ]
+            ]
+          },
+          "mariadb": {
+            "rows": [
+              [
+                "1",
+                "1"
+              ],
+              [
+                "2",
+                "2"
+              ],
+              [
+                "3",
+                "3"
+              ]
+            ]
+          },
+          "postgres": {
+            "rows": [
+              [
+                "1",
+                "1"
+              ],
+              [
+                "2",
+                "2"
+              ],
+              [
+                "3",
+                "3"
+              ]
+            ]
+          },
+          "mssql": {
+            "rows": [
+              [
+                "1",
+                "1"
+              ],
+              [
+                "2",
+                "2"
+              ],
+              [
+                "3",
+                "3"
+              ]
+            ]
+          }
+        }
+      }
+    }
+  }
+}

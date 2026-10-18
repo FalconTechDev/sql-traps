@@ -1,0 +1,74 @@
+<!doctype html><meta charset=utf-8><title>sql-traps</title>
+<style>body{font:15px system-ui;max-width:1100px;margin:2em auto;padding:0 1em}table{border-collapse:collapse;width:100%}td,th{border:1px solid #bbb;padding:4px 8px;vertical-align:top}.diff{background:#fff3cd}.err{color:#b00020}</style>
+<h1>sql-traps</h1><p>Run at 2026-10-18T15:36:37+00:00. Every cell is an actual query result.</p><ul>
+<li><b>mysql</b>: 8.4.11</li>
+<li><b>mariadb</b>: 11.8.9-MariaDB-ubu2404</li>
+<li><b>postgres</b>: PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 1</li>
+<li><b>mssql</b>: Microsoft SQL Server 2022 (RTM-CU27-GDR) (KB5126934) - 16.0.4305.5 (X64) Oct 2 2026 17:28:</li>
+</ul>
+<h2 id=concat-null>String concatenation with NULL</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>&#x27;a&#x27; || NULL</td><td>NULL</td><td>NULL</td><td>NULL</td><td class=err>ERROR: (102, b&quot;Incorrect syntax near &#x27;|&#x27;.DB-Lib error message 20018, severity 15:\nGene</td></tr>
+<tr class=diff><td>CONCAT(&#x27;a&#x27;, NULL)</td><td>NULL</td><td>NULL</td><td>a</td><td>a</td></tr>
+<tr class=diff><td>&#x27;a&#x27; + NULL</td><td>NULL</td><td>NULL</td><td class=err>ERROR: operator is not unique: unknown + unknown LINE 1: SELECT &#x27;a&#x27; + NULL ^ HINT: Coul</td><td>NULL</td></tr>
+</table><p>MySQL/MariaDB: || is logical OR by default (PIPES_AS_CONCAT off), so &#x27;a&#x27;||NULL is NULL; SQL Server rejects ||. PostgreSQL CONCAT ignores NULL arguments, giving &#x27;a&#x27;; PostgreSQL&#x27;s || result comes from the run only (docs page did not cover it). SQL Server + docs: not checked.</p><ul>
+<li><a href='https://dev.mysql.com/doc/refman/8.4/en/logical-operators.html'>MySQL 8.4: logical operators (||)</a> (checked 2026-10-18)</li>
+<li><a href='https://www.postgresql.org/docs/18/functions-string.html'>PostgreSQL 18: string functions (concat)</a> (checked 2026-10-18)</li>
+</ul>
+<h2 id=count-star-vs-col>COUNT(*) vs COUNT(col) vs COUNT(DISTINCT col)</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr><td>counts</td><td>3,2,1</td><td>3,2,1</td><td>3,2,1</td><td>3,2,1</td></tr>
+</table><p>Identical on all four engines in this run: COUNT(*) counts rows, COUNT(col) skips NULLs. Control case: no divergence. Doc link: not checked.</p><ul>
+</ul>
+<h2 id=distinct-null>DISTINCT and UNION treat NULLs as equal</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr><td>SELECT DISTINCT x</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+<tr><td>WHERE x = x</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+</table><p>Control case: DISTINCT collapses NULLs into one group (2 rows), while x = x is not true for NULL (1 row). Identical on all four. Doc link: not checked.</p><ul>
+</ul>
+<h2 id=fetch-with-ties>Standard FETCH FIRST ... WITH TIES</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>ORDER BY x FETCH FIRST 2 ROWS WITH TIES</td><td class=err>ERROR: (1064, &quot;You have an error in your SQL syntax; check the manual that corresponds </td><td>1; 2; 2</td><td>1; 2; 2</td><td class=err>ERROR: (153, b&#x27;Invalid usage of the option FIRST in the FETCH statement.DB-Lib error me</td></tr>
+<tr class=diff><td>ORDER BY x FETCH FIRST 2 ROWS ONLY</td><td class=err>ERROR: (1064, &quot;You have an error in your SQL syntax; check the manual that corresponds </td><td>1; 2</td><td>1; 2</td><td class=err>ERROR: (153, b&#x27;Invalid usage of the option FIRST in the FETCH statement.DB-Lib error me</td></tr>
+</table><p>MySQL 8.4 rejects FETCH FIRST here; SQL Server accepts FETCH only after OFFSET and only with ONLY (WITH TIES is not in its documented syntax). MariaDB and PostgreSQL accept it. MariaDB and MySQL docs: not checked.</p><ul>
+<li><a href='https://learn.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql?view=sql-server-ver16'>SQL Server: ORDER BY / OFFSET FETCH</a> (checked 2026-10-18)</li>
+</ul>
+<h2 id=group-by-nonagg>Selecting a non-grouped column</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>SELECT a, b ... GROUP BY a</td><td class=err>ERROR: (1055, &quot;Expression #2 of SELECT list is not in GROUP BY clause and contains nona</td><td>1,10</td><td class=err>ERROR: column &quot;t.b&quot; must appear in the GROUP BY clause or be used in an aggregate funct</td><td class=err>ERROR: (8120, b&quot;Column &#x27;t.b&#x27; is invalid in the select list because it is not contained </td></tr>
+</table><p>MySQL 8.4 rejects it by default (ONLY_FULL_GROUP_BY); MariaDB 11.8 accepts it and returns an arbitrary b (here 10); PostgreSQL and SQL Server reject it. MariaDB docs: ONLY_FULL_GROUP_BY is not in its default sql_mode.</p><ul>
+<li><a href='https://dev.mysql.com/doc/refman/8.4/en/group-by-handling.html'>MySQL 8.4: GROUP BY handling</a> (checked 2026-10-18)</li>
+<li><a href='https://mariadb.com/kb/en/sql-mode/'>MariaDB: sql_mode</a> (checked 2026-10-18)</li>
+</ul>
+<h2 id=implicit-cast>Implicit type conversion</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>&#x27;10&#x27; + 5</td><td>15.0</td><td>15.0</td><td>15</td><td>15</td></tr>
+<tr class=diff><td>&#x27;10abc&#x27; + 5</td><td>15.0</td><td>15.0</td><td class=err>ERROR: invalid input syntax for type integer: &quot;10abc&quot; LINE 1: SELECT &#x27;10abc&#x27; + 5 ^</td><td class=err>ERROR: (245, b&quot;Conversion failed when converting the varchar value &#x27;10abc&#x27; to data type</td></tr>
+<tr><td>&#x27;2&#x27; &gt; &#x27;10&#x27; (two strings)</td><td>true</td><td>true</td><td>true</td><td>true</td></tr>
+</table><p>MySQL/MariaDB coerce &#x27;10abc&#x27; to a number (15.0); PostgreSQL and SQL Server raise a conversion error. Docs on conversion rules: not checked.</p><ul>
+</ul>
+<h2 id=integer-division>Integer division</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>7 / 2</td><td>3.5000</td><td>3.5000</td><td>3</td><td>3</td></tr>
+<tr class=diff><td>-7 / 2</td><td>-3.5000</td><td>-3.5000</td><td>-3</td><td>-3</td></tr>
+<tr class=diff><td>7 / 2.0</td><td>3.5000</td><td>3.5000</td><td>3.5000000000000000</td><td>3.500000</td></tr>
+</table><p>MySQL/MariaDB return an exact decimal for 7/2 (3.5000); PostgreSQL and SQL Server truncate integers (3). MySQL docs: / does not return an integer, DIV does integer division. PostgreSQL/SQL Server docs for truncation: not checked.</p><ul>
+<li><a href='https://dev.mysql.com/doc/refman/8.4/en/arithmetic-functions.html'>MySQL 8.4: arithmetic operators</a> (checked 2026-10-18)</li>
+</ul>
+<h2 id=not-in-null>NOT IN with NULL in the subquery</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr><td>rows of a not in b</td><td>(no rows)</td><td>(no rows)</td><td>(no rows)</td><td>(no rows)</td></tr>
+</table><p>If the subquery returns a NULL and no value matches, NOT IN yields NULL rather than true, so the row is silently dropped. All four engines returned zero rows here. Source covers PostgreSQL only; other engines&#x27; docs: not checked.</p><ul>
+<li><a href='https://www.postgresql.org/docs/18/functions-subquery.html'>PostgreSQL 18: subquery expressions</a> (checked 2026-10-18)</li>
+</ul>
+<h2 id=null-order>Position of NULL in ORDER BY</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>ORDER BY x</td><td>NULL; 1; 2</td><td>NULL; 1; 2</td><td>1; 2; NULL</td><td>NULL; 1; 2</td></tr>
+<tr class=diff><td>ORDER BY x DESC</td><td>2; 1; NULL</td><td>2; 1; NULL</td><td>NULL; 2; 1</td><td>2; 1; NULL</td></tr>
+</table><p>Ascending, NULL sorts first in MySQL, MariaDB and SQL Server (docs: lowest) and last in PostgreSQL (docs: larger than any value; NULLS FIRST/LAST override). MySQL/MariaDB docs: not checked.</p><ul>
+<li><a href='https://www.postgresql.org/docs/18/queries-order.html'>PostgreSQL 18: sorting rows</a> (checked 2026-10-18)</li>
+<li><a href='https://learn.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql?view=sql-server-ver16'>SQL Server: ORDER BY (NULLs lowest)</a> (checked 2026-10-18)</li>
+</ul>
+<h2 id=string-compare>Case and trailing spaces in string comparison</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr class=diff><td>&#x27;a&#x27; = &#x27;A&#x27;</td><td>equal</td><td>equal</td><td>different</td><td>equal</td></tr>
+<tr class=diff><td>&#x27;a&#x27; = &#x27;a &#x27; (trailing space)</td><td>different</td><td>equal</td><td>different</td><td>equal</td></tr>
+<tr><td>&#x27;a&#x27; = &#x27; a&#x27; (leading space)</td><td>different</td><td>different</td><td>different</td><td>different</td></tr>
+</table><p>PostgreSQL is case-sensitive for &#x27;a&#x27;=&#x27;A&#x27;; the others (default collations of these images) are not. Trailing space: MySQL 8.4 differs, MariaDB and SQL Server ignore it. MySQL docs: PAD SPACE collations ignore trailing spaces, NO PAD ones do not; Unicode UCA 9.0.0+ collations are NO PAD, which matches the MySQL 8.4 result. Why MariaDB and SQL Server behave so: not checked.</p><ul>
+<li><a href='https://dev.mysql.com/doc/refman/8.4/en/char.html'>MySQL 8.4: CHAR and VARCHAR types (trailing spaces)</a> (checked 2026-10-18)</li>
+</ul>
+<h2 id=window-default-frame>Default window frame of LAST_VALUE</h2><table><tr><th>case</th><th>mysql</th><th>mariadb</th><th>postgres</th><th>mssql</th></tr>
+<tr><td>LAST_VALUE(x) OVER (ORDER BY x)</td><td>1,1; 2,2; 3,3</td><td>1,1; 2,2; 3,3</td><td>1,1; 2,2; 3,3</td><td>1,1; 2,2; 3,3</td></tr>
+</table><p>With ORDER BY the default frame is RANGE UNBOUNDED PRECEDING to CURRENT ROW (through the last peer), so LAST_VALUE returns the current row, not the partition&#x27;s last row. All four engines agree on this data: no divergence. Docs cited: PostgreSQL only.</p><ul>
+<li><a href='https://www.postgresql.org/docs/18/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS'>PostgreSQL 18: window function calls</a> (checked 2026-10-18)</li>
+</ul>

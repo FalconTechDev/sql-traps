@@ -1,0 +1,16 @@
+id: integer-division
+title: Integer division
+cases:
+- name: 7 / 2
+  sql: SELECT 7 / 2
+- name: -7 / 2
+  sql: SELECT -7 / 2
+- name: 7 / 2.0
+  sql: SELECT 7 / 2.0
+explanation: 'MySQL/MariaDB return an exact decimal for 7/2 (3.5000); PostgreSQL and SQL Server truncate
+  integers (3). MySQL docs: / does not return an integer, DIV does integer division. PostgreSQL/SQL Server
+  docs for truncation: not checked.'
+sources:
+- url: https://dev.mysql.com/doc/refman/8.4/en/arithmetic-functions.html
+  title: 'MySQL 8.4: arithmetic operators'
+  checked: '2026-10-18'
